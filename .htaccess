@@ -1,0 +1,155 @@
+# ==================== TRUSTFINVEST SECURITY CONFIGURATION ====================
+# This .htaccess file provides security by blocking direct access to source files
+# and preventing view-source attacks
+
+# Enable mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Set the base directory
+    RewriteBase /
+    
+    # ==================== BLOCK CSS FILE ACCESS ====================
+    # Block direct access to all .css files
+    RewriteRule ^.*\.css$ - [F,L]
+    
+    # Return 404 for CSS file requests
+    <FilesMatch "\.css$">
+        Deny from all
+        Header set HTTP/1.1 404 "Not Found"
+    </FilesMatch>
+    
+    # ==================== BLOCK JAVASCRIPT FILE ACCESS ====================
+    # Block direct access to all .js files
+    RewriteRule ^.*\.js$ - [F,L]
+    
+    # Return 404 for JS file requests
+    <FilesMatch "\.js$">
+        Deny from all
+        Header set HTTP/1.1 404 "Not Found"
+    </FilesMatch>
+    
+    # ==================== BLOCK HTML FILE ACCESS ====================
+    # Block direct access to .html files (allow index.html for routing)
+    RewriteRule ^(?!index\.html).*\.html$ - [F,L]
+    
+    # Return 404 for HTML file requests (except index.html)
+    <FilesMatch "^(?!index\.html).*\.html$">
+        Deny from all
+        Header set HTTP/1.1 404 "Not Found"
+    </FilesMatch>
+    
+    # ==================== BLOCK SOURCE FILE ACCESS ====================
+    # Block access to backup and temporary files
+    RewriteRule ^.*\.(bak|old|orig|backup|tmp|temp)$ - [F,L]
+    
+    # Block access to sensitive configuration files
+    RewriteRule ^(\.env|\.git|\.htaccess|composer\.json|package\.json|firebase-service-account\.json)$ - [F,L]
+    
+    # ==================== BLOCK COMMON ATTACK PATTERNS ====================
+    # Block access to common sensitive directories
+    RewriteRule ^(admin|config|database|private|secure|backup)(/|$) - [F,L]
+    
+    # Block path traversal attempts
+    RewriteCond %{THE_REQUEST} \.\./
+    RewriteRule ^.*$ - [F,L]
+    
+    # Block SQL injection attempts
+    RewriteCond %{QUERY_STRING} (union|select|insert|update|delete|drop|create|alter|exec|script|javascript|onerror|onclick)
+    RewriteRule ^.*$ - [F,L]
+    
+    # Block XSS attempts
+    RewriteCond %{QUERY_STRING} <script|javascript:|onerror=|onclick=
+    RewriteRule ^.*$ - [F,L]
+    
+    # ==================== BLOCK DIRECTORY LISTING ====================
+    # Prevent directory listing
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^.*$ - [F,L]
+    
+    # ==================== BLOCK NULL BYTE INJECTION ====================
+    RewriteCond %{THE_REQUEST} \x00
+    RewriteRule ^.*$ - [F,L]
+    
+</IfModule>
+
+# ==================== ADDITIONAL SECURITY HEADERS ====================
+
+# Set security headers to prevent view-source and other attacks
+<IfModule mod_headers.c>
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Clickjacking protection
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Disable client-side caching of sensitive pages
+    Header set Cache-Control "no-cache, no-store, must-revalidate, private, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy - prevent inline scripts
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://translate.google.com https://cdn.jsdelivr.net https://swiper.cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://translate.google.com; frame-src https://translate.google.com"
+</IfModule>
+
+# ==================== REMOVE SENSITIVE HEADERS ====================
+
+# Hide Apache version and OS info
+ServerTokens Prod
+ServerSignature Off
+
+# ==================== FILE COMPRESSION ====================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# ==================== BROWSER CACHING ====================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Cache images for 1 month
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    
+    # Cache fonts for 1 year
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    
+    # Cache HTML for 5 minutes (to allow updates)
+    ExpiresByType text/html "access plus 5 minutes"
+    
+    # Default expiration
+    ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# ==================== HTTPS REDIRECT ====================
+# Uncomment to force HTTPS (recommended for production)
+<IfModule mod_rewrite.c>
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ==================== PREVENT HOTLINKING ====================
+<IfModule mod_rewrite.c>
+    # Allow direct requests
+    RewriteCond %{HTTP_REFERER} ^$
+    # Allow requests from your own domain
+    RewriteCond %{HTTP_REFERER} ^https?://(www\.)?trustfinvest\.com(/.*)?$ [NC]
+    RewriteRule ^(.*)\.(jpg|jpeg|gif|png|webp)$ - [L]
+    
+    # Block hotlinking from other domains
+    RewriteRule ^(.*)\.(jpg|jpeg|gif|png|webp)$ - [F]
+</IfModule>
+
+# ==================== END OF SECURITY CONFIGURATION ====================
