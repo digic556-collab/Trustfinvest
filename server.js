@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 require('dotenv').config();
+
+// Import Firebase and Firestore
+const { verifyConnection } = require('./backend/firebase-admin');
 
 // Import routes
 const emailRoutes = require('./backend/routes');
@@ -24,24 +26,21 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// ==================== DATABASE CONNECTION ====================
+// ==================== FIREBASE CONNECTION ====================
 
-// Connect to MongoDB (optional - for development)
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then(() => {
-        console.log('[Database] Connected to MongoDB');
-    })
-    .catch(err => {
-        console.warn('[Database] MongoDB connection warning (proceeding without DB):', err.message);
-        console.log('[Database] Running in API-only mode without persistence');
-    });
-} else {
-    console.log('[Database] MongoDB URI not configured - running in API-only mode');
-}
+let firestoreReady = false;
+
+// Verify Firestore connection on startup
+verifyConnection().then(isConnected => {
+    firestoreReady = isConnected;
+    if (isConnected) {
+        console.log('[Firebase] Firestore database connected and verified');
+    } else {
+        console.warn('[Firebase] Firestore connection verification failed');
+    }
+}).catch(error => {
+    console.error('[Firebase] Connection error:', error.message);
+});
 
 // ==================== LOGGING MIDDLEWARE ====================
 
@@ -53,12 +52,11 @@ app.use((req, res, next) => {
 // ==================== HEALTH CHECK ENDPOINT ====================
 
 app.get('/health', (req, res) => {
-    const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     res.status(200).json({
         status: 'ok',
         message: 'TrustFinvest Backend is running',
         timestamp: new Date().toISOString(),
-        database: mongoStatus,
+        database: firestoreReady ? 'connected' : 'connecting',
         uptime: process.uptime()
     });
 });
@@ -73,6 +71,7 @@ app.get('/api/docs', (req, res) => {
     res.status(200).json({
         service: 'TrustFinvest Newsletter & Notification Service',
         version: '1.0.0',
+        database: 'Firebase Firestore',
         endpoints: {
             newsletter: {
                 'POST /api/email/subscribe': 'Subscribe to newsletter',
@@ -99,6 +98,11 @@ app.get('/api/docs', (req, res) => {
                 port: process.env.SMTP_PORT,
                 fromEmail: process.env.SMTP_FROM_EMAIL,
                 fromName: process.env.SMTP_FROM_NAME
+            },
+            firebase: {
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+                database: 'Firestore'
             }
         }
     });
@@ -131,12 +135,14 @@ app.listen(PORT, () => {
     console.log('');
     console.log('╔════════════════════════════════════════════════════════╗');
     console.log('║     TrustFinvest Newsletter & Notification Service      ║');
+    console.log('║              Firebase Firestore Edition                 ║');
     console.log('╚════════════════════════════════════════════════════════╝');
     console.log('');
     console.log(`[Server] Running on http://localhost:${PORT}`);
     console.log(`[Environment] ${process.env.NODE_ENV}`);
     console.log(`[SMTP] ${process.env.SMTP_USER} @ ${process.env.SMTP_HOST}`);
-    console.log(`[Database] ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+    console.log(`[Firebase] Project: ${process.env.FIREBASE_PROJECT_ID}`);
+    console.log(`[Firestore] Status: ${firestoreReady ? 'Connected' : 'Connecting'}`);
     console.log('');
     console.log('[API] Documentation: GET /api/docs');
     console.log('[Health] Check: GET /health');
