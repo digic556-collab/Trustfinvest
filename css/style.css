@@ -73,6 +73,19 @@ img {
     display: block;
 }
 
+/* ==================== SVG ICON STYLING ==================== */
+svg {
+    display: inline-block;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+}
+
+svg.icon-fill {
+    fill: currentColor;
+    stroke: none;
+}
+
 button {
     font-family: var(--font-main);
     cursor: pointer;
@@ -1610,7 +1623,7 @@ button {
 .back-to-top-button {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     z-index: 999;
     opacity: 0;
     visibility: hidden;
