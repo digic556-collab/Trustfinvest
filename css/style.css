@@ -374,6 +374,41 @@ button {
     font-size: 0.95rem;
 }
 
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(0, 86, 210, 0.08), rgba(255, 122, 0, 0.08));
+    border: 1px solid rgba(0, 86, 210, 0.2);
+    transition: var(--transition);
+}
+
+.contact-info:hover {
+    background: linear-gradient(135deg, rgba(0, 86, 210, 0.15), rgba(255, 122, 0, 0.15));
+    border-color: rgba(0, 86, 210, 0.4);
+}
+
+.contact-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--primary-blue);
+    stroke-width: 2.5;
+}
+
+.contact-email {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.contact-email:hover {
+    color: var(--accent-orange);
+}
+
 .btn-login {
     padding: 8px 20px;
     border: 2px solid var(--primary-blue);
@@ -1607,6 +1642,37 @@ button {
     background-color: #E56900;
 }
 
+.footer-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    vertical-align: middle;
+    display: inline-block;
+    color: var(--accent-orange);
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    color: #CCCCCC;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.contact-link:hover {
+    color: var(--accent-orange);
+    padding-left: 5px;
+}
+
+.contact-address {
+    display: flex;
+    align-items: flex-start;
+    color: #CCCCCC;
+    font-size: 0.9rem;
+    gap: 6px;
+}
+
 .footer-bottom {
     text-align: center;
     padding-top: 25px;
@@ -2728,6 +2794,10 @@ button {
     
     .navbar-actions {
         gap: 10px;
+    }
+    
+    .contact-info {
+        display: none;
     }
     
     .language-selector {
