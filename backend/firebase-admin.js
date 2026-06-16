@@ -26,12 +26,13 @@ if (serviceAccount) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     projectId: process.env.FIREBASE_PROJECT_ID || 'trustfin-8e4d1',
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'trustfin-8e4d1.firebasestorage.app'
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'trustfin-8e4d1.appspot.com'
   });
 } else {
   // For development/testing without service account
   admin.initializeApp({
-    projectId: process.env.FIREBASE_PROJECT_ID || 'trustfin-8e4d1'
+    projectId: process.env.FIREBASE_PROJECT_ID || 'trustfin-8e4d1',
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'trustfin-8e4d1.appspot.com'
   });
 }
 
