@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TrustFin Finance - Admin Dashboard. Manage platform operations, users, and financial transactions.">
+    <meta name="description" content="Trustfinvest - Admin Dashboard. Manage platform operations, users, and financial transactions.">
     <meta name="keywords" content="admin dashboard, user management, platform operations, financial management">
-    <meta name="author" content="Trust Finance">
+    <meta name="author" content="Trustfinvest">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0056D2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,15 +13,30 @@
     <meta name="apple-mobile-web-app-title" content="Admin">
     
     <!-- Open Graph Tags -->
-    <meta property="og:title" content="Admin Dashboard | TrustFin Finance">
+    <meta property="og:title" content="Admin Dashboard | Trustfinvest">
     <meta property="og:description" content="Admin Dashboard. Manage platform operations, users, and financial transactions.">
+    <meta property="og:image" content="./img/trustfin.webp">
+    <meta property="og:url" content="https://trustfinvest.com/admin.html">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Trust Finance">
     
+    <!-- Sitelinks Search Box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://trustfinvest.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://trustfinvest.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://trustfinance.io/admin">
+    <link rel="canonical" href="https://trustfinvest.com/admin">
     
-    <title>Admin Dashboard | TrustFin Finance</title>
+    <title>Admin Dashboard | Trustfinvest</title>
     <link rel="shortcut icon" href="/img/download.png" type="image/x-icon">
     <link rel="apple-touch-icon" href="/img/download.png">
     
@@ -48,7 +63,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2>Admin Access</h2>
-                <p>TrustFin Finance Management Portal</p>
+                <p>Trustfinvest Management Portal</p>
             </div>
             
             <form class="login-form" id="adminLoginForm">
@@ -65,7 +80,7 @@
                     <div class="input-with-icon">
                         <i class="fa-solid fa-lock"></i>
                         <input type="password" id="adminPassword" placeholder="Enter admin password" required autocomplete="current-password">
-                        <button type="button" class="toggle-password" data-target="adminPassword">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('adminPassword')">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -94,7 +109,7 @@
                     <i class="fa-solid fa-shield-halved brand-icon"></i>
                     <div class="brand-text">
                         <h1>Admin Panel</h1>
-                        <span>TrustFin Finance</span>
+                        <span>Trustfinvest</span>
                     </div>
                 </div>
                 <button class="sidebar-close" id="sidebarClose">
@@ -108,7 +123,7 @@
                 </div>
                 <div class="user-info">
                     <div class="user-name" id="sidebarAdminName">Administrator</div>
-                    <div class="user-email" id="sidebarAdminEmail">admin@TrustFin.com</div>
+                    <div class="user-email" id="sidebarAdminEmail">admin@trustfinvest.com</div>
                 </div>
             </div>
 
@@ -160,7 +175,7 @@
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Logout</span>
                 </button>
-                <div class="copyright">© 2020 TrustFin Finance</div>
+                <div class="copyright">© 2020 Trustfinvest</div>
             </div>
         </aside>
 
@@ -201,7 +216,7 @@
                     <div class="welcome-banner">
                         <div class="welcome-text">
                             <h3>Welcome back, Admin!</h3>
-                            <p>Here's what's happening with TrustFin Finance today.</p>
+                            <p>Here's what's happening with Trustfinvest today.</p>
                         </div>
                         <div class="current-time" id="currentTime"></div>
                     </div>
@@ -543,7 +558,7 @@
             <!-- Footer -->
             <footer class="admin-footer">
                 <div class="footer-content">
-                    <p>© 2020 TrustFin Finance Admin Panel. All rights reserved.</p>
+                    <p>© 2020 Trustfinvest Admin Panel. All rights reserved.</p>
                     <div class="footer-links">
                         <span id="lastUpdate">Last update: --</span>
                     </div>
@@ -677,5 +692,21 @@
 
     <!-- Scripts -->
     <script type="module" src="./js/admin.js"></script>
+    <script>
+        // Toggle Password Visibility
+        function togglePasswordVisibility(id) {
+            const passwordInput = document.getElementById(id);
+            const icon = passwordInput.nextElementSibling.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

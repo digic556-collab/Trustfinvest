@@ -27,15 +27,13 @@ async function handleNewsletterSubscription(email, firstName = '', lastName = ''
     try {
         const result = await emailAPI.subscribeNewsletter(email, firstName, lastName);
         if (result.success) {
-            showNotification('✅ Successfully subscribed to newsletter!', 'success');
-            clearNewsletterForm();
+            console.log('[Newsletter] Successfully subscribed!');
             return true;
         } else {
-            showNotification(result.message, 'warning');
+            console.warn('[Newsletter] Subscription failed:', result.message);
             return false;
         }
     } catch (error) {
-        showNotification('❌ Subscription failed: ' + error.message, 'error');
         console.error('[Newsletter]', error);
         return false;
     }
@@ -46,20 +44,15 @@ async function handleNewsletterSubscription(email, firstName = '', lastName = ''
  */
 async function handleNewsletterUnsubscription(email) {
     try {
-        if (!confirm('Are you sure you want to unsubscribe from our newsletter?')) {
-            return false;
-        }
-
         const result = await emailAPI.unsubscribeNewsletter(email);
         if (result.success) {
-            showNotification('✅ Successfully unsubscribed from newsletter', 'success');
+            console.log('[Newsletter] Successfully unsubscribed!');
             return true;
         } else {
-            showNotification(result.message, 'warning');
+            console.warn('[Newsletter] Unsubscription failed:', result.message);
             return false;
         }
     } catch (error) {
-        showNotification('❌ Error: ' + error.message, 'error');
         console.error('[Unsubscribe]', error);
         return false;
     }
@@ -72,7 +65,6 @@ async function loadEmailPreferences(email) {
     try {
         const result = await emailAPI.getPreferences(email);
         if (result.success) {
-            displayPreferences(result.preferences);
             return result.preferences;
         }
     } catch (error) {
@@ -87,11 +79,10 @@ async function updateEmailPreferences(email, preferences) {
     try {
         const result = await emailAPI.updatePreferences(email, preferences);
         if (result.success) {
-            showNotification('✅ Preferences updated successfully', 'success');
+            console.log('[Preferences] Updated successfully');
             return result.preferences;
         }
     } catch (error) {
-        showNotification('❌ Error updating preferences: ' + error.message, 'error');
         console.error('[Update Preferences]', error);
     }
 }
@@ -141,8 +132,6 @@ async function handleInvestmentCreated(userId, userEmail, userName, investmentDa
                 id: investmentData.investmentId
             }
         );
-
-        showNotification('✅ Investment confirmed! Check your email.', 'success');
         console.log('[Investment] Activity logged and notification sent');
     } catch (error) {
         console.warn('[Investment]', error);
@@ -177,8 +166,6 @@ async function handleWithdrawalRequest(userId, userEmail, userName, withdrawalDa
                 id: withdrawalData.withdrawalId
             }
         );
-
-        showNotification('✅ Withdrawal request submitted! Check your email.', 'success');
         console.log('[Withdrawal] Activity logged and notification sent');
     } catch (error) {
         console.warn('[Withdrawal]', error);
@@ -205,7 +192,6 @@ async function logEarningActivity(userId, userEmail, userName, amount, type = 'd
 async function logTaskCompletion(userId, userEmail, userName, taskName, reward) {
     try {
         await emailAPI.logTaskCompletion(userId, userEmail, userName, taskName, reward);
-        showNotification(`✅ Task completed! Earned $${reward}`, 'success');
         console.log('[Activity] Task logged:', taskName);
     } catch (error) {
         console.warn('[Activity] Failed to log task:', error);
@@ -220,7 +206,6 @@ async function loadUserActivities(userId, limit = 10) {
     try {
         const result = await emailAPI.getUserActivities(userId, limit, 0);
         if (result.success) {
-            displayActivityHistory(result.activities);
             return result.activities;
         }
     } catch (error) {
@@ -228,173 +213,6 @@ async function loadUserActivities(userId, limit = 10) {
     }
 }
 
-// ==================== NOTIFICATION HELPERS ====================
-
-/**
- * Display notification message to user
- */
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notif = document.createElement('div');
-    notif.className = `notification notification-${type}`;
-    notif.innerHTML = message;
-    
-    // Add to page
-    document.body.appendChild(notif);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        notif.style.opacity = '0';
-        setTimeout(() => notif.remove(), 300);
-    }, 5000);
-}
-
-/**
- * Display email preferences in UI
- */
-function displayPreferences(preferences) {
-    // Update checkbox states or similar UI elements
-    if (document.getElementById('pref-newsletter')) {
-        document.getElementById('pref-newsletter').checked = preferences.newsletter;
-    }
-    if (document.getElementById('pref-activities')) {
-        document.getElementById('pref-activities').checked = preferences.activities;
-    }
-    if (document.getElementById('pref-investments')) {
-        document.getElementById('pref-investments').checked = preferences.investments;
-    }
-    if (document.getElementById('pref-promotions')) {
-        document.getElementById('pref-promotions').checked = preferences.promotions;
-    }
-}
-
-/**
- * Display activity history in dashboard
- */
-function displayActivityHistory(activities) {
-    const container = document.getElementById('activity-container');
-    if (!container) return;
-
-    container.innerHTML = activities.map(activity => `
-        <div class="activity-item">
-            <div class="activity-icon">
-                ${getActivityIcon(activity.type)}
-            </div>
-            <div class="activity-details">
-                <strong>${activity.description}</strong>
-                <small>${new Date(activity.createdAt).toLocaleString()}</small>
-            </div>
-            <div class="activity-amount">
-                ${activity.amount > 0 ? '+' : ''}$${activity.amount}
-            </div>
-        </div>
-    `).join('');
-}
-
-/**
- * Get icon for activity type
- */
-function getActivityIcon(type) {
-    const icons = {
-        deposit: '💰',
-        investment: '📈',
-        withdrawal: '💳',
-        earning: '💵',
-        task_completed: '✅',
-        referral: '👥',
-        login: '🔑',
-        profile_update: '👤',
-        plan_change: '📊',
-        admin_action: '⚙️'
-    };
-    return icons[type] || '📌';
-}
-
-/**
- * Clear newsletter form
- */
-function clearNewsletterForm() {
-    const form = document.getElementById('newsletter-form');
-    if (form) {
-        form.reset();
-    }
-}
-
-// ==================== EVENT LISTENERS ====================
-
-// Newsletter subscription form
-document.addEventListener('DOMContentLoaded', () => {
-    const newsletterForm = document.getElementById('newsletter-form');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('newsletter-email')?.value;
-            const firstName = document.getElementById('newsletter-firstName')?.value;
-            const lastName = document.getElementById('newsletter-lastName')?.value;
-            
-            if (email) {
-                await handleNewsletterSubscription(email, firstName, lastName);
-            }
-        });
-    }
-
-    // Email preferences form (if in settings)
-    const prefsForm = document.getElementById('email-preferences-form');
-    if (prefsForm) {
-        prefsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = userEmail; // Get from logged-in user data
-            const preferences = {
-                newsletter: document.getElementById('pref-newsletter')?.checked,
-                activities: document.getElementById('pref-activities')?.checked,
-                investments: document.getElementById('pref-investments')?.checked,
-                promotions: document.getElementById('pref-promotions')?.checked
-            };
-            
-            await updateEmailPreferences(email, preferences);
-        });
-    }
-
-    // Load activities on dashboard
-    if (document.getElementById('activity-container')) {
-        const userId = getCurrentUserId(); // Get from session
-        if (userId) {
-            loadUserActivities(userId, 20);
-        }
-    }
-
-    // Load preferences on settings page
-    if (document.getElementById('email-preferences-form')) {
-        const email = userEmail; // Get from logged-in user data
-        if (email) {
-            loadEmailPreferences(email);
-        }
-    }
-});
-
-// ==================== UTILITY FUNCTIONS ====================
-
-/**
- * Get current user ID from session
- */
-function getCurrentUserId() {
-    // Get from localStorage, session, or user object
-    return localStorage.getItem('userId') || sessionStorage.getItem('userId');
-}
-
-/**
- * Get current user email
- */
-function getCurrentUserEmail() {
-    return localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-}
-
-/**
- * Get current user name
- */
-function getCurrentUserName() {
-    return localStorage.getItem('userName') || sessionStorage.getItem('userName');
-}
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
@@ -408,7 +226,6 @@ if (typeof module !== 'undefined' && module.exports) {
         handleWithdrawalRequest,
         logEarningActivity,
         logTaskCompletion,
-        loadUserActivities,
-        showNotification
+        loadUserActivities
     };
 }

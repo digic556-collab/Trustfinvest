@@ -518,7 +518,7 @@ function initPreloader() {
     preloader.id = 'preloader';
     preloader.innerHTML = `
         <div class="preloader-content">
-            <img src="https://trustfinvest.com/img/download.png" alt="Trust Finance" class="preloader-logo">
+            <img src="./img/download.png" alt="Trust Finance" class="preloader-logo">
             <div class="preloader-spinner"></div>
             <p class="preloader-text">TRUST FINANCE</p>
             <p class="preloader-tagline">Institutional-Grade Security</p>

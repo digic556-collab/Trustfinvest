@@ -31,7 +31,50 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://trustfinvest.com';
 
 // Email templates with activity listeners
 const emailTemplates = {
-    // Authentication Emails
+    // ... (existing templates) ...
+    passwordReset: (userName, resetLink) => ({
+        subject: '🔑 Your Password Reset Request',
+        html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                    .header { background: linear-gradient(135deg, ${BRAND_COLOR_PRIMARY}, ${BRAND_COLOR_ACCENT}); padding: 30px; text-align: center; color: white; }
+                    .header img { height: 50px; margin-bottom: 10px; }
+                    .header h1 { margin: 10px 0; font-size: 28px; }
+                    .content { padding: 30px; background: white; }
+                    .button { display: inline-block; background: ${BRAND_COLOR_PRIMARY}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 15px 0; }
+                    .footer { background: #f9f9f9; padding: 20px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <img src="${LOGO_URL}" alt="TrustFinvest Logo" />
+                        <h1>Password Reset Request</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hi ${userName},</p>
+                        <p>We received a request to reset your password. Click the button below to choose a new one. If you did not make this request, you can safely ignore this email.</p>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${resetLink}" class="button">Reset Your Password</a>
+                        </div>
+
+                        <p>This link will expire in 1 hour.</p>
+                        <p>Best regards,<br><strong>The TrustFinvest Team</strong></p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; 2024 TrustFinvest. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `
+    }),
+    // ... (rest of the templates)
     newUserRegistration: (userName, email) => ({
         subject: '🎉 Welcome to TrustFinvest - Verify Your Account',
         html: `
@@ -716,7 +759,27 @@ const emailTemplates = {
 
 // Email sending functions
 const emailService = {
-    // Send welcome email for new registration
+    // ... (existing functions) ...
+
+    // Send password reset email
+    sendPasswordResetEmail: async (email, userName, resetLink) => {
+        try {
+            const mailOptions = {
+                from: `${process.env.SMTP_FROM_NAME} <${process.env.SMTP_FROM_EMAIL}>`,
+                to: email,
+                ...emailTemplates.passwordReset(userName, resetLink)
+            };
+            
+            const result = await transporter.sendMail(mailOptions);
+            console.log(`[Email] Password reset email sent to ${email}`);
+            return { success: true, messageId: result.messageId };
+        } catch (error) {
+            console.error(`[Email] Failed to send password reset email:`, error.message);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // ... (rest of the functions) ...
     sendNewUserRegistration: async (email, firstName, lastName) => {
         try {
             const userName = firstName || email.split('@')[0];
@@ -735,7 +798,6 @@ const emailService = {
         }
     },
 
-    // Send welcome back email
     sendWelcomeBack: async (email, firstName, lastLogin) => {
         try {
             const userName = firstName || email.split('@')[0];
@@ -754,7 +816,6 @@ const emailService = {
         }
     },
 
-    // Send deposit confirmation
     sendDepositConfirmation: async (email, userName, amount, reference) => {
         try {
             const mailOptions = {
@@ -772,7 +833,6 @@ const emailService = {
         }
     },
 
-    // Send investment confirmation
     sendInvestmentConfirmation: async (email, userName, plan, amount, roi, duration) => {
         try {
             const mailOptions = {
@@ -790,7 +850,6 @@ const emailService = {
         }
     },
 
-    // Send withdrawal initiated
     sendWithdrawalInitiated: async (email, userName, amount, method) => {
         try {
             const mailOptions = {
@@ -808,7 +867,6 @@ const emailService = {
         }
     },
 
-    // Send withdrawal approved
     sendWithdrawalApproved: async (email, userName, amount, method) => {
         try {
             const mailOptions = {
@@ -826,7 +884,6 @@ const emailService = {
         }
     },
 
-    // Send task completion reward
     sendTaskCompleted: async (email, userName, taskTitle, reward) => {
         try {
             const mailOptions = {
@@ -844,7 +901,6 @@ const emailService = {
         }
     },
 
-    // Send daily earnings update
     sendEarningsUpdate: async (email, userName, dailyEarnings, totalEarnings, investmentCount) => {
         try {
             const mailOptions = {
@@ -862,7 +918,6 @@ const emailService = {
         }
     },
 
-    // Send newsletter
     sendNewsletter: async (email, content) => {
         try {
             const mailOptions = {
@@ -880,7 +935,6 @@ const emailService = {
         }
     },
 
-    // Send activity alert
     sendActivityAlert: async (email, userName, activityType, details) => {
         try {
             const mailOptions = {
